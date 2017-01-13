@@ -1,69 +1,78 @@
 <!doctype html>
 <html>
-	<head>
-		<title>Login</title>
+  <head>
+    <title>Login</title>
     <meta name='viewport' content='initial-scale=1'>
-		<style>
-			.facebook {
-				color: white;
-				background-color: #3b5998;
-			}
+    <style>
+      .facebook {
+        color: white;
+        background-color: #3b5998;
+      }
 
-			.twitter {
-				color: black;
-				background-color: #1da1f2;
-			}
-		</style>
-	</head>
-	<body>
-		<div class='loggedin' hidden></div>
-		<div class='providers' hidden>
-		<button type='button' class='facebook' data-provider='facebook'>
-			Login with Facebook
-		</button>
-		<!--
-		<button type='button' class='twitter' data-provider='twitter'>
-			Login with Twitter
-		</button>
-		-->
-		</div>
-		<script>
-			const loginBaseUrl = 'http://localhost:8080/v1.0/auth/';
+      .twitter {
+        color: black;
+        background-color: #1da1f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='loggedin' hidden></div>
+    <div class='providers' hidden>
+    <button type='button' class='facebook' data-provider='facebook'>
+      Login with Facebook
+    </button>
+    <!--
+    <button type='button' class='twitter' data-provider='twitter'>
+      Login with Twitter
+    </button>
+    -->
+    </div>
+    <script>
+      const loginBaseUrl = 'http://localhost:8080/v1.0/auth/';
+      const redirectUrl = 'http://localhost:10000/facebook.html';
+      const failureUrl = 'http://localhost:10000/';
+      const authorizationToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdjOTFlOGQ2MTkwNDZhZDciLCJzY29wZSI6ImNsaWVudCIsImlhdCI6MTQ4NDMwMDUzMn0.MpmbsIq5eXwSfIauZTwwDirFBjK1Bk1PRhPEnTd_iz8';
 
-			function checkTokenExists() {
-				const providers = document.querySelector('.providers');
-				const loggedin = document.querySelector('.loggedin');
+      function checkTokenExists() {
+        const providers = document.querySelector('.providers');
+        const loggedin = document.querySelector('.loggedin');
 
-				if (localStorage.token) {
-					providers.hidden = true;
-					loggedin.hidden = false;
-					loggedin.textContent =
-						"logged in with token " + localStorage.token;
-					const clearButton = document.createElement('button');
-					clearButton.type = 'button';
-					clearButton.textContent = 'clear';
-					loggedin.appendChild(clearButton)
-				} else {
-					providers.hidden = false;
-					loggedin.hidden = true;
-				}
-			}
+        if (localStorage.token) {
+          providers.hidden = true;
+          loggedin.hidden = false;
+          loggedin.textContent =
+            "logged in with token " + localStorage.token;
+          const clearButton = document.createElement('button');
+          clearButton.type = 'button';
+          clearButton.textContent = 'clear';
+          loggedin.appendChild(clearButton)
+        } else {
+          providers.hidden = false;
+          loggedin.hidden = true;
+        }
+      }
 
-			document.querySelector('.providers').addEventListener('click', e => {
-				if (e.target.tagName === 'BUTTON') {
-					window.open(loginBaseUrl + e.target.dataset.provider);
-				}
-			});
-			document.querySelector('.loggedin').addEventListener('click', e => {
-					if (e.target.tagName === 'BUTTON') {
-						localStorage.removeItem('token');
-						checkTokenExists();
-					}
-			});
+      document.querySelector('.providers').addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+          const loginUrl = new URL(loginBaseUrl + e.target.dataset.provider);
+          loginUrl.searchParams.set('redirectUrl', redirectUrl);
+          loginUrl.searchParams.set('failureUrl', failureUrl);
+          loginUrl.searchParams.set('authorizationToken', authorizationToken);
 
-			checkTokenExists();
-			window.addEventListener('storage', checkTokenExists);
-		</script>
-	</body>
+          window.open(loginUrl.toString());
+        }
+      });
+      document.querySelector('.loggedin').addEventListener('click', e => {
+          if (e.target.tagName === 'BUTTON') {
+            localStorage.removeItem('token');
+            checkTokenExists();
+          }
+      });
+
+      checkTokenExists();
+      window.addEventListener('storage', checkTokenExists);
+    </script>
+  </body>
 </html>
 
